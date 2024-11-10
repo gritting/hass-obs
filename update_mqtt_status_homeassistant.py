@@ -276,7 +276,7 @@ class Sensor:
             "streaming": self.streaming(),
             "virtual_camera": self.virtual_camera(),
             "paused": self.paused(),
-            "fps": self.fps(),
+            "fps": int(self.fps()),
             "frame_time_ns": self.frame_time_ns(),
             "frames": self.frames(),
             "lagged_frames": self.lagged_frames()
