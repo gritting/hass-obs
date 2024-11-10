@@ -256,7 +256,7 @@ class Sensor:
         self.streaming = obs.obs_frontend_streaming_active
         self.virtual_camera = obs.obs_frontend_virtualcam_active
         self.paused = obs.obs_frontend_recording_paused
-        self.replay_buffer =obs.obs_frontend_replay_buffer_active
+        self.replay_buffer = obs.obs_frontend_replay_buffer_active
         self.fps = obs.obs_get_active_fps
         self.frame_time_ns = obs.obs_get_average_frame_time_ns
         self.frames = obs.obs_get_total_frames
@@ -371,6 +371,7 @@ def script_unload():
     print("Script unloading")
     STATE = "off"
     if CLIENT.is_connected():
+        SENSOR.publish_attributes()
         SENSOR.publish_off_state()
         set_persistent_switch_availability()
         remove_profiles_from_homeassistant()
@@ -524,6 +525,7 @@ def recording_stopped():
     Publishes state of sensor and record switch
     """
     SENSOR.publish_state()
+    SENSOR.publish_attributes()
     if CONTROL:
         RECORD_SWITCH.publish_state(SwitchPayload.OFF)
 
@@ -541,6 +543,7 @@ def streaming_stopped():
     Publishes state of sensor and stream switch
     """
     SENSOR.publish_state()
+    SENSOR.publish_attributes()
     if CONTROL:
         STREAM_SWITCH.publish_state(SwitchPayload.OFF)
 
@@ -558,6 +561,7 @@ def virtual_camera_stopped():
     Publishes state of sensor and virtual camera switch
     """
     SENSOR.publish_state()
+    SENSOR.publish_attributes()
     if CONTROL:
         VIRTUAL_CAMERA_SWITCH.publish_state(SwitchPayload.OFF)
 
