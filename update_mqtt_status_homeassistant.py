@@ -224,7 +224,7 @@ class RecordSwitch(PersistentSwitch):
         super().__init__()
 
 class SensorState(str, enum.Enum):
-    Off = "Off"
+    Off = "off"
     Stopped = "Stopped"
     Recording = "Recording"
     Streaming = "Streaming"
@@ -369,7 +369,7 @@ def script_unload():
     """
     global STATE
     print("Script unloading")
-    STATE = "Off"
+    STATE = "off"
     if CLIENT.is_connected():
         SENSOR.publish_off_state()
         set_persistent_switch_availability()
