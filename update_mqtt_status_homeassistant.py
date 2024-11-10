@@ -32,12 +32,12 @@ be controlled through MQTT.
 
 # Default values for the configurable options:
 INTERVAL = 5 # Update interval (in seconds)
-MQTT_HOST = "localhost" # Hostname of your MQTT server
-MQTT_USER = ""
+MQTT_HOST = "" # Hostname of your MQTT server
+MQTT_USER = "obs"
 MQTT_PW = ""
 MQTT_PORT = 1883 # Default MQTT port is 1883
-MQTT_BASE_CHANNEL = ""
-MQTT_SENSOR_NAME = "obs"
+MQTT_BASE_CHANNEL = "homeassistant"
+MQTT_SENSOR_NAME = "obs_state"
 PROFILES = []
 STREAM_SWITCH = None
 VIRTUAL_CAMERA_SWITCH = None
