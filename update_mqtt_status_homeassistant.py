@@ -664,16 +664,17 @@ def update_status():
         STREAM_SWITCH.publish_availability(SwitchPayload.ON)
         VIRTUAL_CAMERA_SWITCH.publish_availability(SwitchPayload.ON)
         RECORD_SWITCH.publish_availability(SwitchPayload.ON)
-    sensor_state = SENSOR.state()
-    previous_state = SENSOR.previous_state
-    if previous_state != SensorState.Stopped and sensor_state == SensorState.Stopped:
-        print("Publishing Final Stopped Message")
-        SENSOR.publish_attributes()
-    if previous_state != SensorState.Off and sensor_state == SensorState.Off:
-        print("Publishing Final Off Message")
-        SENSOR.publish_attributes()
-    if SENSOR.active:
-        SENSOR.publish_attributes()
+    if SENSOR is not None:
+        sensor_state = SENSOR.state()
+        previous_state = SENSOR.previous_state
+        if previous_state != SensorState.Stopped and sensor_state == SensorState.Stopped:
+            print("Publishing Final Stopped Message")
+            SENSOR.publish_attributes()
+        if previous_state != SensorState.Off and sensor_state == SensorState.Off:
+            print("Publishing Final Off Message")
+            SENSOR.publish_attributes()
+        if SENSOR.active:
+            SENSOR.publish_attributes()
 
 def message_to_switch_entity(message):
     """
