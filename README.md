@@ -2,14 +2,15 @@
 
 ## NOTE:
 
-This is a clone of https://gist.github.com/HeedfulCrayon/9ff74d2aa1bc629ed17e0780f9a91a3d
+This is my personal fork of [dlsniper's clone](https://github.com/dlsniper/hass-obs) of [HeedfulCrayon's original script.](https://gist.github.com/HeedfulCrayon/9ff74d2aa1bc629ed17e0780f9a91a3d)
 
-The main difference is that it contains the support for Virtual Camera in OBS.
+* dlsniper's clone adds support for Virtual Camera in OBS
+* My fork adds some minor bugfixes and preferred defaults
 
 The work is copyrighted to [@HeedfulCrayon](https://github.com/HeedfulCrayon), this repository
 is here for archiving purposes only.
 
-Tested under OBS Studio 29.0.2, on Pop!_OS 22.04, connecting to Home Assistant 2023.3.5.
+Tested under OBS Studio 30.2.1-1 connecting to Home Assistant 2024.11.1.
 
 ### Setup:
 1. Download script
@@ -71,6 +72,7 @@ Tested under OBS Studio 29.0.2, on Pop!_OS 22.04, connecting to Home Assistant 2
 * Recording
 * Streaming
 * Streaming and Recording
+* Virtual Camera
 * Stopped (OBS Open)
 * Off (OBS Closed)
 
