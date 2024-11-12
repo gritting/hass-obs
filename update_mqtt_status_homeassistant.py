@@ -7,11 +7,11 @@ import pathlib
 import time
 import enum
 import uuid
-
+import platform
 
 # Meta
-__version__ = '1.0.2'
-__version_info__ = (1, 0, 1)
+__version__ = '1.1.0'
+__version_info__ = (1, 1, 0)
 __license__ = "AGPLv3"
 __license_info__ = {
     "AGPLv3": {
@@ -46,6 +46,7 @@ SENSOR = None
 CONTROL = False
 DEBUG = False
 LOCK = False
+MQTT_MODEL = platform.uname()[1] #Goes into the Home Assistant UI on the MQTT integration page
 MAC = ':'.join(['{:02x}'.format((uuid.getnode() >> ele) & 0xff)
                 for ele in range(0,8*6,8)][::-1])
 
@@ -116,6 +117,7 @@ class ProfileSwitch(Switch):
                 "name": f"{self.mqtt_sensor_name}",
                 "identifiers": f"[['mac',{MAC}]]",
                 "manufacturer": f"OBS Script v.{__version__}",
+                "model": f"{MQTT_MODEL}",
                 "sw_version": __version__
             },
             "state_topic": self.state_topic,
@@ -146,6 +148,7 @@ class StreamSwitch(PersistentSwitch):
                 "name": f"{self.mqtt_sensor_name}",
                 "identifiers": f"[['mac',{MAC}]]",
                 "manufacturer": f"OBS Script v.{__version__}",
+                "model": f"{MQTT_MODEL}",
                 "sw_version": __version__
             },
             "state_topic": self.state_topic,
@@ -177,6 +180,7 @@ class VirtualCameraSwitch(PersistentSwitch):
                 "name": f"{self.mqtt_sensor_name}",
                 "identifiers": f"[['mac',{MAC}]]",
                 "manufacturer": f"OBS Script v.{__version__}",
+                "model": f"{MQTT_MODEL}",
                 "sw_version": __version__
             },
             "state_topic": self.state_topic,
@@ -208,6 +212,7 @@ class RecordSwitch(PersistentSwitch):
                 "name": f"{self.mqtt_sensor_name}",
                 "identifiers": f"[['mac',{MAC}]]",
                 "manufacturer": f"OBS Script v.{__version__}",
+                "model": f"{MQTT_MODEL}",
                 "sw_version": __version__
             },
             "state_topic": self.state_topic,
@@ -245,6 +250,7 @@ class Sensor:
                 "name": f"{self.mqtt_sensor_name}",
                 "identifiers": f"[['mac',{MAC}]]",
                 "manufacturer": f"OBS Script v.{__version__}",
+                "model": f"{MQTT_MODEL}",
                 "sw_version": __version__
             },
             "state_topic": self.state_topic,
@@ -389,6 +395,7 @@ def script_defaults(settings):
     obs.obs_data_set_default_string(settings, "mqtt_base_channel", MQTT_BASE_CHANNEL)
     obs.obs_data_set_default_string(settings, "mqtt_sensor_name", MQTT_SENSOR_NAME)
     obs.obs_data_set_default_int(settings, "mqtt_port", MQTT_PORT)
+    obs.obs_data_set_default_string(settings, "mqtt_model", MQTT_MODEL)
     obs.obs_data_set_default_int(settings, "interval", INTERVAL)
     obs.obs_data_set_default_bool(settings, "controllable", CONTROL)
 
@@ -397,15 +404,16 @@ def script_properties():
     Makes this script's settings configurable via OBS's Scripts GUI.
     """
     props = obs.obs_properties_create()
-    obs.obs_properties_add_text(props, "mqtt_host", "MQTT server hostname", obs.OBS_TEXT_DEFAULT)
-    obs.obs_properties_add_text(props, "mqtt_user", "MQTT username", obs.OBS_TEXT_DEFAULT)
-    obs.obs_properties_add_text(props, "mqtt_pw", "MQTT password", obs.OBS_TEXT_PASSWORD)
-    obs.obs_properties_add_text(props, "mqtt_base_channel", "MQTT Base channel",obs.OBS_TEXT_DEFAULT)
+    obs.obs_properties_add_text(props, "mqtt_host", "MQTT Server Hostname", obs.OBS_TEXT_DEFAULT)
+    obs.obs_properties_add_int(props, "mqtt_port", "MQTT Server TCP/IP Port", MQTT_PORT, 65535, 1)
+    obs.obs_properties_add_text(props, "mqtt_user", "MQTT Username", obs.OBS_TEXT_DEFAULT)
+    obs.obs_properties_add_text(props, "mqtt_pw", "MQTT Password", obs.OBS_TEXT_PASSWORD)
+    obs.obs_properties_add_text(props, "mqtt_base_channel", "MQTT Base Channel",obs.OBS_TEXT_DEFAULT)
     obs.obs_properties_add_text(props, "mqtt_sensor_name", "MQTT Sensor Name",obs.OBS_TEXT_DEFAULT)
-    obs.obs_properties_add_int(props, "mqtt_port", "MQTT TCP/IP port", MQTT_PORT, 65535, 1)
+    obs.obs_properties_add_text(props, "mqtt_model", "MQTT Device Model Name", obs.OBS_TEXT_DEFAULT)
     obs.obs_properties_add_int(props, "interval", "Update Interval (seconds)", 1, 3600, 1)
     obs.obs_properties_add_bool(props, "controllable", "Control Streaming/Recording via MQTT")
-    obs.obs_properties_add_bool(props, "debug", "Debug")
+    obs.obs_properties_add_bool(props, "debug", "Enable Verbose Debug Output")
     return props
 
 def script_update(settings):
@@ -420,6 +428,7 @@ def script_update(settings):
     global MQTT_PORT
     global MQTT_BASE_CHANNEL
     global MQTT_SENSOR_NAME
+    global MQTT_MODEL
     global INTERVAL
     global CONTROL
     global DEBUG
@@ -438,6 +447,9 @@ def script_update(settings):
     mqtt_sensor_name = obs.obs_data_get_string(settings, "mqtt_sensor_name")
     if mqtt_sensor_name != MQTT_SENSOR_NAME:
         MQTT_SENSOR_NAME = mqtt_sensor_name
+    mqtt_model = obs.obs_data_get_string(settings, "mqtt_model")
+    if mqtt_model != MQTT_MODEL:
+        MQTT_MODEL = mqtt_model
     mqtt_port = obs.obs_data_get_int(settings, "mqtt_port")
     if mqtt_port != MQTT_PORT:
         MQTT_PORT = mqtt_port
