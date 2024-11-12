@@ -334,7 +334,7 @@ def on_mqtt_connect(client, userdata, flags, rc):
     Called when the MQTT client is connected from the server.  Just prints a
     message indicating we connected successfully.
     """
-    print("MQTT connection successful")
+    if DEBUG: print("MQTT connection successful")
 
     set_homeassistant_config()
 
@@ -343,7 +343,7 @@ def on_mqtt_disconnect(client, userdata, rc):
     Called when the MQTT client gets disconnected.  Just logs a message about it
     (we'll auto-reconnect inside of update_status()).
     """
-    print("MQTT disconnected.  Reason: {}".format(str(rc)))
+    if DEBUG: print("MQTT disconnected.  Reason: {}".format(str(rc)))
 
 def on_mqtt_message(client, userdata, message):
     """
@@ -364,7 +364,7 @@ def script_load(settings):
     Just prints a message indicating that the script was loaded successfully.
     """
     global STATE
-    print("MQTT script loaded.")
+    if DEBUG: print("MQTT script loaded.")
     STATE = "Initializing"
 
 def script_unload():
@@ -374,7 +374,7 @@ def script_unload():
     recording/streaming forever) and calls `CLIENT.disconnect()`.
     """
     global STATE
-    print("Script unloading")
+    if DEBUG: print("Script unloading")
     STATE = "off"
     if CLIENT.is_connected():
         SENSOR.publish_attributes()
@@ -493,7 +493,7 @@ def frontend_changed(event):
     if function != None:
         function()
     else:
-        print(f"Unknown event fired: {event}")
+        if DEBUG: print(f"Unknown event fired: {event}")
 
 def profile_changed():
     """
@@ -508,7 +508,7 @@ def profile_changed():
         if profile.profile_name == new_profile:
             profile.publish_state(SwitchPayload.ON)
             PROFILE = profile
-    print("Profile Changed")
+    if DEBUG: print("Profile Changed")
 
 def profile_list_changed():
     """
@@ -521,7 +521,7 @@ def profile_list_changed():
     time.sleep(0.1)
     setup_profiles_in_homeassistant()
     LOCK = False
-    print("Profile List Changed")
+    if DEBUG: print("Profile List Changed")
 
 def recording_started():
     """
@@ -651,7 +651,7 @@ def execute_action(switch, payload):
         if PROFILE.profile_name != switch.profile_name:
             obs.obs_frontend_set_current_profile(switch.profile_name)
         else:
-            print(f"Already on profile {switch.profile_name}")
+            if DEBUG: print(f"Already on profile {switch.profile_name}")
     elif switch.switch_type == SwitchType.stream:
         if payload == SwitchPayload.ON:
             obs.obs_frontend_streaming_start()
@@ -684,10 +684,10 @@ def update_status():
         sensor_state = SENSOR.state()
         previous_state = SENSOR.previous_state
         if previous_state != SensorState.Stopped and sensor_state == SensorState.Stopped:
-            print("Publishing Final Stopped Message")
+            if DEBUG: print("Publishing Final Stopped Message")
             SENSOR.publish_attributes()
         if previous_state != SensorState.Off and sensor_state == SensorState.Off:
-            print("Publishing Final Off Message")
+            if DEBUG: print("Publishing Final Off Message")
             SENSOR.publish_attributes()
         if SENSOR.active:
             SENSOR.publish_attributes()
