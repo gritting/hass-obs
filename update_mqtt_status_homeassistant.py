@@ -142,7 +142,7 @@ class StreamSwitch(PersistentSwitch):
         self.config_topic = f"{self.mqtt_base_channel}/switch/{self.mqtt_sensor_name}_stream/config"
         self.available_topic = f"{self.mqtt_base_channel}/switch/{self.mqtt_sensor_name}/stream/available"
         self.config = {
-            "name": f"{self.mqtt_sensor_name} Stream",
+            "name": f"Toggle Streaming",
             "unique_id": f"{self.mqtt_sensor_name}_stream",
             "device": {
                 "name": f"{self.mqtt_sensor_name}",
@@ -174,7 +174,7 @@ class VirtualCameraSwitch(PersistentSwitch):
         self.config_topic = f"{self.mqtt_base_channel}/switch/{self.mqtt_sensor_name}_virtual_camera/config"
         self.available_topic = f"{self.mqtt_base_channel}/switch/{self.mqtt_sensor_name}/virtual_camera/available"
         self.config = {
-            "name": f"{self.mqtt_sensor_name} Virtual Camera",
+            "name": f"Toggle Virtual Camera",
             "unique_id": f"{self.mqtt_sensor_name}_virtual_camera",
             "device": {
                 "name": f"{self.mqtt_sensor_name}",
@@ -206,7 +206,7 @@ class RecordSwitch(PersistentSwitch):
         self.config_topic = f"{self.mqtt_base_channel}/switch/{self.mqtt_sensor_name}_record/config"
         self.available_topic = f"{self.mqtt_base_channel}/switch/{self.mqtt_sensor_name}/record/available"
         self.config = {
-            "name": f"{self.mqtt_sensor_name} Record",
+            "name": f"Toggle Recording",
             "unique_id": f"{self.mqtt_sensor_name}_record",
             "device": {
                 "name": f"{self.mqtt_sensor_name}",
@@ -499,6 +499,8 @@ def profile_changed():
     """
     Callback for OBS_FRONTEND_EVENT_PROFILE_CHANGED
     """
+    if not CONTROL: return
+
     global PROFILE
     while LOCK:
         time.sleep(0.5)
@@ -628,8 +630,11 @@ def set_persistent_switch_availability():
     """
     Reports the availability of the persistent switches
     """
-    RECORD_SWITCH.publish_availability(SwitchPayload.OFF)
-    STREAM_SWITCH.publish_availability(SwitchPayload.OFF)
+    global CONTROL
+    if CONTROL:
+        VIRTUAL_CAMERA_SWITCH.publish_availability(SwitchPayload.OFF)
+        RECORD_SWITCH.publish_availability(SwitchPayload.OFF)
+        STREAM_SWITCH.publish_availability(SwitchPayload.OFF)
 
 def remove_profiles_from_homeassistant():
     """
