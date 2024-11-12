@@ -1,85 +1,105 @@
-## OBS MQTT Status to Home Assistant
+# OBS Status via MQTT to Home Assistant
+## Introduction & Attribution Note:
+This is my personal fork of [dlsniper's clone](https://github.com/dlsniper/hass-obs) of [HeedfulCrayon's original script.](https://gist.github.com/HeedfulCrayon/9ff74d2aa1bc629ed17e0780f9a91a3d) This fork is not affiliated with or endorsed by the previous/original authors, but I thank them for their helpful foundations that have made my little version of this script possible.
 
-## NOTE:
+- Original work and copyrighted by [@HeedfulCrayon](https://github.com/HeedfulCrayon)
+- Virtual Camera support added by [@dlsniper](https://github.com/dlsniper)
+- This fork by [@gritting](https://github.com/gritting):
+    1. **New "model name" option** for MQTT config, useful for identifying the machine running the script in Home Assistant.
+    2. **New script defaults**: Updated to include changes like MQTT base topic and username settings.
+    3. **Minor bug fixes and improvements** (see [commit history](https://github.com/gritting/hass-obs/commits/main/) for full details)
 
-This is my personal fork of [dlsniper's clone](https://github.com/dlsniper/hass-obs) of [HeedfulCrayon's original script.](https://gist.github.com/HeedfulCrayon/9ff74d2aa1bc629ed17e0780f9a91a3d)
+### Compatibility
+- **Tested with**: **OBS Studio 30.2.1-1** and **Home Assistant 2024.11.1**
 
-* dlsniper's clone adds support for Virtual Camera in OBS
-* My fork adds some minor bugfixes and preferred defaults
+## Setup Instructions:
 
-The work is copyrighted to [@HeedfulCrayon](https://github.com/HeedfulCrayon), this repository
-is here for archiving purposes only.
+### Prerequisites
+1. **Download the script**
+2. **Install `mqtt-wrapper`** by running `pip install mqtt-wrapper`
+3. **Open OBS Studio**:
+    - Add a script (Tools -> Scripts)
+4. **Configure Parameters**: The default base channel is `homeassistant`, and default sensor name is `obs_state`. This will create a path like `homeassistant/sensor/obs_state`.  Make sure you set all of your config options before setting the password to prevent unintentionally sending the wrong base topic/sensor name.
+5. **Click the script refresh button** to load the script.
 
-Tested under OBS Studio 30.2.1-1 connecting to Home Assistant 2024.11.1.
+### With MQTT Autodiscovery Enabled
 
-### Setup:
-1. Download script
-2. Install mqtt-wrapper `pip install mqtt-wrapper`
-3. Open OBS Studio
-4. In OBS Studio add a script (Tools -> Scripts)
-5. Configure script parameters (my base channel is homeassistant and my sensor name is obs, creating the path homeassistant/sensor/obs)
+6. **If you have enabled MQTT Autodiscovery in Home Assistant:** you should see sensors for recording, streaming, virtual camera, and profile controls automatically appear under your MQTT integration.
 
-![script_parameters](https://user-images.githubusercontent.com/5224972/116624859-eeb98b80-a905-11eb-9620-6dfe53b15551.png)
+7. You can check if the topic appears as expected in your broker with a tool like [MQTT Explorer](https://github.com/thomasnordquist/MQTT-Explorer).
 
-6. Click the script refresh button
-7. If mqtt autodiscovery is on in home assistant, you should see a sensor called sensor.[MQTT Sensor Name] with attributes containing the stats.
+### With MQTT Autodiscovery Disabled
+   
+6. **You must add manual configuration if MQTT Autodiscovery is **not** turned on, similar to below:
+    - **Sensor Configuration**: 
+        ```yaml
+        - platform: "mqtt"
+            name: "OBS State"
+            state_topic: "obs_state/state"
+            icon: "mdi:video-wireless"
+            force_update: true
+            qos: 1
+            json_attributes_topic: "obs_state/attributes"
+        ```
 
-   If you have allowed the MQTT to control OBS, you will see two switches called switch.[MQTT Sensor Name]_record and switch.[MQTT Sensor Name]_stream
+    - **Switch for Controlling Recording**:
+        ```yaml
+        - platform: "mqtt"
+            name: OBS Record Switch
+            state_topic: "homeassistant/switch/obs_state/record/state"
+            command_topic: "homeassistant/switch/obs_state/record/set"
+            available_topic: "homeassistant/switch/obs_state/record/available"
+            payload_on: "ON"
+            payload_off: "OFF"
+            icon: mdi:record
+        ```
 
-   You will also see a switch for each profile named switch.[MQTT Sensor Name]_[OBS Profile Name]_Profile (__NOTE: Profiles in OBS will have to contain no spaces__)
+    - **Switch for Controlling Streaming**:
+        ```yaml
+        - platform: "mqtt"
+            name: OBS Stream Switch
+            state_topic: "homeassistant/switch/obs_state/stream/state"
+            command_topic: "homeassistant/switch/obs_state/stream/set"
+            available_topic: "homeassistant/switch/obs_state/stream/available"
+            payload_on: "ON"
+            payload_off: "OFF"
+            icon: mdi:broadcast
+        ```
 
-   If mqtt autodiscovery is not turned on, you will need to add this as your sensor config
-    ```
-    - platform: "mqtt"
-      name: "OBS"
-      state_topic: "[Your set topic here]/state"
-      icon: "mdi:video-wireless"
-      force_update: true
-      qos: 1
-      json_attributes_topic: "[Your set topic here]/attributes"
-    ```
-   and if you would like to control via MQTT without autodiscovery you will need to add two mqtt switches for recording and streaming
-    ```
-    - platform: "mqtt"
-      name: OBS Record Switch
-      state_topic: "[MQTT Base Channel]/switch/[MQTT Sensor Name]/record/state"
-      command_topic: "[MQTT Base Channel]/switch/[MQTT Sensor Name]/record/set"
-      available_topic: "[MQTT Base Channel]/switch/[MQTT Sensor Name]/record/available"
-      payload_on: "ON"
-      payload_off: "OFF"
-      icon: mdi:record
-    - platform: "mqtt"
-      name: OBS Stream Switch
-      state_topic: "[MQTT Base Channel]/switch/[MQTT Sensor Name]/stream/state"
-      command_topic: "[MQTT Base Channel]/switch/[MQTT Sensor Name]/stream/set"
-      available_topic: "[MQTT Base Channel]/switch/[MQTT Sensor Name]/stream/available"
-      payload_on: "ON"
-      payload_off: "OFF"
-      icon: mdi:broadcast
-    ```
-   If you would like to control profiles without discovery turned on you will need to add switches __FOR EACH__ profile you wish to turn on from Home Assistant
-    ```
-    - platform: "mqtt"
-      name: OBS Test Profile
-      state_topic: "[MQTT Base Channel]/switch/[OBS Profile Name]/state"
-      command_topic: "[MQTT Base Channel]/switch/[OBS Profile Name]/profile/set"
-      payload_on: "ON"
-      payload_off: "OFF"
-      icon: mdi:alpha-p-box
-    ```
+    - **Switch for Controlling Virtual Camera**
+        ```yaml
+        - platform: "mqtt"
+            name: OBS Virtual Camera Switch
+            state_topic: "homeassistant/switch/obs_state/virtual_camera/state"
+            command_topic: "homeassistant/switch/obs_state/virtual_camera/set"
+            available_topic: "homeassistant/switch/obs_state/virtual_camera/available"
+            payload_on: "ON"
+            payload_off: "OFF"
+            icon: mdi:camera-wireless
+        ```
 
-### Sensor States
-* Recording
-* Streaming
-* Streaming and Recording
-* Virtual Camera
-* Stopped (OBS Open)
-* Off (OBS Closed)
+    - **Switch for Controlling Profiles** (add one switch _per profile_):
+        ```yaml
+        - platform: "mqtt"
+            name: OBS Test Profile
+            state_topic: "homeassistant/switch/profile_name/state"
+            command_topic: "homeassistant/switch/profile_name/profile/set"
+            payload_on: "ON"
+            payload_off: "OFF"
+            icon: mdi:alpha-p-box
+        ```
 
-# NOTE: If you have autodiscovery on when you update the script, make sure to remove the Stream, Record and OBS Sensor configs by doing an empty publish to their respective configs
+## Sensor States:
+- **Recording**
+- **Streaming**
+- **Streaming and Recording**
+- **Virtual Camera**
+- **Stopped (OBS Open)**
+- **Off (OBS Closed)**
 
-`[Your base channel]/sensor/[Sensor Name]/config` for sensor
-
-`[Your base channel]/switch/[Sensor Name]_stream/config` for stream switch
-
-`[Your base channel]/sensor/[Sensor Name]_record/config` for record switch
+## Updating with Autodiscovery:
+If you update the script while autodiscovery is enabled, remove the following topics to avoid duplicates showing up in the Home Assistant MQTT integration. You can use a tool like [MQTT Explorer](https://github.com/thomasnordquist/MQTT-Explorer) to delete these topics from your broker easily.
+- `homeassistant/sensor/obs_state/config` for sensor state.
+- `homeassistant/switch/obs_state_stream/config` for stream switch.
+- `homeassistant/switch/obs_state_record/config` for record switch.
+- `homeassistant/switch/obs_state_virtual_camera/config` for virtual
