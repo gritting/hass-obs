@@ -114,7 +114,7 @@ class ProfileSwitch(Switch):
             "name": f"{self.profile_name} Profile",
             "unique_id": f"{self.mqtt_sensor_name}_{self.profile_name}_profile",
             "device": {
-                "name": f"{self.mqtt_sensor_name}",
+                "name": f"{self.mqtt_sensor_name}".title().replace("_"," ").replace("Obs","OBS"),
                 "identifiers": f"[['mac',{MAC}]]",
                 "manufacturer": f"OBS Script v.{__version__}",
                 "model": f"{MQTT_MODEL}",
@@ -145,7 +145,7 @@ class StreamSwitch(PersistentSwitch):
             "name": f"Toggle Streaming",
             "unique_id": f"{self.mqtt_sensor_name}_stream",
             "device": {
-                "name": f"{self.mqtt_sensor_name}",
+                "name": f"{self.mqtt_sensor_name}".title().replace("_"," ").replace("Obs","OBS"),
                 "identifiers": f"[['mac',{MAC}]]",
                 "manufacturer": f"OBS Script v.{__version__}",
                 "model": f"{MQTT_MODEL}",
@@ -177,7 +177,7 @@ class VirtualCameraSwitch(PersistentSwitch):
             "name": f"Toggle Virtual Camera",
             "unique_id": f"{self.mqtt_sensor_name}_virtual_camera",
             "device": {
-                "name": f"{self.mqtt_sensor_name}",
+                "name": f"{self.mqtt_sensor_name}".title().replace("_"," ").replace("Obs","OBS"),
                 "identifiers": f"[['mac',{MAC}]]",
                 "manufacturer": f"OBS Script v.{__version__}",
                 "model": f"{MQTT_MODEL}",
@@ -209,7 +209,7 @@ class RecordSwitch(PersistentSwitch):
             "name": f"Toggle Recording",
             "unique_id": f"{self.mqtt_sensor_name}_record",
             "device": {
-                "name": f"{self.mqtt_sensor_name}",
+                "name": f"{self.mqtt_sensor_name}".title().replace("_"," ").replace("Obs","OBS"),
                 "identifiers": f"[['mac',{MAC}]]",
                 "manufacturer": f"OBS Script v.{__version__}",
                 "model": f"{MQTT_MODEL}",
@@ -244,10 +244,10 @@ class Sensor:
         self.config_topic = f"{self.mqtt_base_channel}/sensor/{self.mqtt_sensor_name}/config"
         self.attributes_topic = f"{self.mqtt_base_channel}/sensor/{self.mqtt_sensor_name}/attributes"
         self.config = {
-            "name": self.mqtt_sensor_name,
+            "name": f"",
             "unique_id": self.mqtt_sensor_name,
             "device": {
-                "name": f"{self.mqtt_sensor_name}",
+                "name": f"{self.mqtt_sensor_name}".title().replace("_"," ").replace("Obs","OBS"),
                 "identifiers": f"[['mac',{MAC}]]",
                 "manufacturer": f"OBS Script v.{__version__}",
                 "model": f"{MQTT_MODEL}",
